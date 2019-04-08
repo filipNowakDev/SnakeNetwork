@@ -18,6 +18,8 @@ typedef struct Fruit
 
 bool updateFruit(Game *game);
 void drawFruit(Game* game);
+bool isFruitHere(Game * game, int x, int y);
+
 
 
 #endif //SNAKENETWORK_FRUIT_H

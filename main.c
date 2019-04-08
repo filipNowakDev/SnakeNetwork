@@ -15,9 +15,6 @@ int main()
     if (init(&game) < 0)
         return -1;
 
-    Network network;
-    initRandomNetwork(&network);
-    game.network = &network;
 
     bool quit = false;
     SDL_Event event;
@@ -49,9 +46,9 @@ int main()
             }
         }
 
-        calculateDistances(&game, game.snake, &network);
-        calculateOutput(&network);
-        //setSnakeDirection(game.snake, getOutputDirection(&network));
+
+
+
         setSnakeDirection(game.snake, direction);
         updateGameState(&game);
         drawGame(&game);

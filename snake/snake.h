@@ -29,6 +29,7 @@ typedef struct SnakeSegment
 
 typedef struct Snake
 {
+    Network* network;
     SnakeSegment* head;
     SnakeSegment* tail;
     SegmentDirection direction;
@@ -40,7 +41,7 @@ void drawSnake(Snake *snake, Game *game);
 
 void drawSnakeSegment(Game* game, SnakeSegment segment);
 
-Snake* getSnake(int x, int y, SegmentDirection direction);
+Snake *getSnake(int x, int y, SegmentDirection direction, Network *network);
 
 void setSnakeDirection(Snake *snake, SegmentDirection direction);
 
@@ -56,7 +57,7 @@ void resetSnake(Snake *snake, int x, int y, SegmentDirection direction);
 
 bool isSnakeValid(Snake* snake);
 
-void calculateDistances(Game* game, Snake *snake, Network *network);
+void calculateDistances(Game *game, Snake *snake);
 
 bool isSnakeSegmentHere(Snake *snake, int x, int y);
 

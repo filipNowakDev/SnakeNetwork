@@ -58,7 +58,7 @@ int init(Game *game)
     }
 
 
-    game->snake = getSnake(BOARD_SIZE / 2, 3, DOWN);
+    game->snake = getSnake(BOARD_SIZE / 2, 3, DOWN, NULL);
     game->fruit.x = rand() % BOARD_SIZE;
     game->fruit.y = rand() % BOARD_SIZE;
     return 0;

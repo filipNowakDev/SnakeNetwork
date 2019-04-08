@@ -17,7 +17,6 @@ typedef struct Game
     SDL_Window *window;
     SDL_Renderer *renderer;
     Snake* snake;
-    Network* network;
     Fruit fruit;
     TTF_Font *font;
 
@@ -25,7 +24,6 @@ typedef struct Game
 
 void updateGameState(Game*game);
 
-bool isFruitHere(Game * game, int x, int y);
 
 
 

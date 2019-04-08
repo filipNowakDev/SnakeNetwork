@@ -25,5 +25,10 @@ void drawFruit(Game *game)
     drawGameObject(game, game->fruit.x, game->fruit.y, COLOUR_FRUIT);
 }
 
+bool isFruitHere(Game *game, int x, int y)
+{
+    return x == game->fruit.x && y == game->fruit.y;
+}
+
 
 
