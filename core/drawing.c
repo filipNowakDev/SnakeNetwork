@@ -5,8 +5,8 @@
 #include "drawing.h"
 #include "../snake/snake.h"
 #include "../utils/colours.h"
-#include "lifecycle.h"
 #include <SDL2/SDL_ttf.h>
+
 
 
 void drawGameObject(Game *game, int x, int y, int r, int g, int b, int a)
@@ -57,20 +57,36 @@ void drawText(char *text, int x, int y, Game *game)
     SDL_UpdateWindowSurface(game->window);
 }
 
-void drawScore(Game *game)
+void drawScoreLabel(Game *game)
 {
     char buff[64];
-    sprintf(buff, "Score: %d", game->snake->length - 1);
+    sprintf(buff, "Score:         %3d", game->population.snakes[game->population.currentBestSnake].length - 1);
     drawText(buff, (BOARD_SIZE + 5) * (GAME_OBJECT_SIZE + GAME_OBJECT_MARGIN),
              5 * (GAME_OBJECT_SIZE + GAME_OBJECT_MARGIN), game);
 
 }
 
+
 void drawGame(Game *game)
 {
-    clearScreen(game);
-    drawFruit(game);
-    drawSnake(game->snake, game);
     drawGameBoardBorder(game);
-    drawScore(game);
+    drawScoreLabel(game);
+    drawGenerationLabel(game);
+    drawBestSnake(game);
+
+}
+
+void drawBestSnake(Game *game)
+{
+    //drawSnake(&game->population.snakes[game->population.currentBestSnake], game);
+    for(int i = 0; i < POPULATION_SIZE; i++)
+        drawSnake(&game->population.snakes[i], game);
+}
+
+void drawGenerationLabel(Game *game)
+{
+    char buff[64];
+    sprintf(buff, "Generation: %3d", game->population.generation);
+    drawText(buff, (BOARD_SIZE + 5) * (GAME_OBJECT_SIZE + GAME_OBJECT_MARGIN),
+             8 * (GAME_OBJECT_SIZE + GAME_OBJECT_MARGIN), game);
 }

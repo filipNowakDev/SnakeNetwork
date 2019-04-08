@@ -14,9 +14,11 @@
 void drawGameObject(Game* game, int x, int y, int r, int g, int b, int a);
 void clearScreen(Game *game);
 void drawGameBoardBorder(Game* game);
+void drawBestSnake(Game *game);
 void drawText(char *text, int x, int y, Game *game);
-void drawScore(Game *game);
+void drawScoreLabel(Game *game);
 void drawGame(Game* game);
+void drawGenerationLabel(Game *game);
 
 
 

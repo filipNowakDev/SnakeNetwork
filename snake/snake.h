@@ -7,6 +7,7 @@
 
 #include "stdbool.h"
 #include "../neural_network/network.h"
+#include "fruit.h"
 
 typedef struct Game Game;
 
@@ -29,19 +30,25 @@ typedef struct SnakeSegment
 
 typedef struct Snake
 {
-    Network* network;
+    Network network;
     SnakeSegment* head;
     SnakeSegment* tail;
     SegmentDirection direction;
+    Fruit fruit;
     int length;
+    double fitness;
+    int lifetime;
     bool addedSegment;
+    bool isAlive;
 } Snake;
 
 void drawSnake(Snake *snake, Game *game);
 
 void drawSnakeSegment(Game* game, SnakeSegment segment);
 
-Snake *getSnake(int x, int y, SegmentDirection direction, Network *network);
+Snake *getSnake(int x, int y, SegmentDirection direction);
+
+void initSnake(Snake *snake, int x, int y, SegmentDirection direction);
 
 void setSnakeDirection(Snake *snake, SegmentDirection direction);
 
@@ -57,8 +64,15 @@ void resetSnake(Snake *snake, int x, int y, SegmentDirection direction);
 
 bool isSnakeValid(Snake* snake);
 
-void calculateDistances(Game *game, Snake *snake);
+void calculateDistances(Fruit *fruit, Snake *snake);
 
 bool isSnakeSegmentHere(Snake *snake, int x, int y);
+
+double getSnakeFitness(Snake* snake);
+
+void calculateFitness(Snake* snake);
+
+int compareSnakeFitness (const void * s1, const void * s2);
+
 
 #endif //SNAKENETWORK_SNAKE_H

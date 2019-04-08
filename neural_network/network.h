@@ -23,13 +23,19 @@ typedef struct Network
     double biasOut[HIDDEN_NEURONS][OUTPUT_NEURONS];
 } Network;
 
-void initRandomNetwork(Network* network);
+void initRandomNetwork(Network *network);
 
 double sigmoid(double x);
 
-void calculateOutput(Network* network);
+void calculateOutput(Network *network);
 
-SegmentDirection getOutputDirection(Network* network);
+SegmentDirection getOutputDirection(Network *network);
+
+void cloneNetwork(Network *parent, Network *child);
+
+void crossoverNetworks(Network *parent1, Network *parent2, Network *child);
+
+void mutateNetwork(double rate, Network *network);
 
 
 #endif //SNAKENETWORK_NETWORK_H

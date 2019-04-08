@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 
+typedef struct Snake Snake;
 typedef struct Game Game;
 
 typedef struct Fruit
@@ -16,9 +17,10 @@ typedef struct Fruit
     int y;
 }Fruit;
 
-bool updateFruit(Game *game);
-void drawFruit(Game* game);
-bool isFruitHere(Game * game, int x, int y);
+void initFruit(Fruit *fruit, Snake *snake);
+bool updateFruit(Fruit *fruit, Snake *snake);
+void drawFruit(Fruit *fruit, Game *game);
+bool isFruitHere(Fruit *fruit, int x, int y);
 
 
 

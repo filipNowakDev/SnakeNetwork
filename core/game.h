@@ -11,17 +11,25 @@
 #include "../snake/snake.h"
 #include "../snake/fruit.h"
 #include "drawing.h"
+#include "../genetics/population.h"
+
+#define SCREEN_WIDTH 1440
+#define SCREEN_HEIGHT 720
+#define BOARD_SIZE 45
 
 typedef struct Game
 {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    Snake* snake;
-    Fruit fruit;
+    Population population;
     TTF_Font *font;
 
 } Game;
 
+
+
+int init(Game* game);
+void free_resources(Game *game);
 void updateGameState(Game*game);
 
 

@@ -6,28 +6,36 @@
 #include "../core/game.h"
 #include "stdlib.h"
 #include "../utils/colours.h"
-#include "../core/lifecycle.h"
 
 
-bool updateFruit(Game *game)
+bool updateFruit(Fruit *fruit, Snake *snake)
 {
-    if(game->snake->head->x == game->fruit.x && game->snake->head->y == game->fruit.y)
+    if(snake->head->x == fruit->x && snake->head->y == fruit->y)
     {
-        game->fruit.x = rand()%BOARD_SIZE;
-        game->fruit.y = rand()%BOARD_SIZE;
+        initFruit(fruit, snake);
         return true;
     }
     return false;
 }
 
-void drawFruit(Game *game)
+void drawFruit(Fruit *fruit, Game *game)
 {
-    drawGameObject(game, game->fruit.x, game->fruit.y, COLOUR_FRUIT);
+    drawGameObject(game, fruit->x, fruit->y, COLOUR_FRUIT);
 }
 
-bool isFruitHere(Game *game, int x, int y)
+bool isFruitHere(Fruit *fruit, int x, int y)
 {
-    return x == game->fruit.x && y == game->fruit.y;
+    return x == fruit->x && y == fruit->y;
+}
+
+
+void initFruit(Fruit *fruit, Snake *snake)
+{
+    do
+    {
+        fruit->x = rand() % BOARD_SIZE;
+        fruit->y = rand() % BOARD_SIZE;
+    }while(isSnakeSegmentHere(snake, fruit->x, fruit->y));
 }
 
 
