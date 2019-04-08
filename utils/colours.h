@@ -1,0 +1,15 @@
+//
+// Created by filip on 4/3/19.
+//
+
+#ifndef SNAKENETWORK_COLOURS_H
+#define SNAKENETWORK_COLOURS_H
+
+#define COLOUR_BACKGROUND 0x11, 0x11, 0x10, 0xFF
+#define COLOUR_SNAKE_SEGMENT 0x80, 0x80, 0x80, 0xFF
+#define TEXT_COLOUR 0xC0, 0xC0, 0xC0
+#define COLOUR_FRUIT 0xFF, 0x00, 0x00, 0xFF
+
+
+
+#endif //SNAKENETWORK_COLOURS_H
