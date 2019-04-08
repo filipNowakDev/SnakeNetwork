@@ -37,13 +37,14 @@ void initSnake(Snake *snake, int x, int y, SegmentDirection direction)
     snake->fitness = 0;
     snake->lifetime = 0;
     initFruit(&snake->fruit, snake);
+    initNetwork(&snake->network);
     snake->isAlive = true;
 }
 
 void destroySnake(Snake *snake)
 {
     destroySnakeSegments(snake);
-    free(snake);
+    destroyNetwork(&snake->network);
 }
 
 
@@ -228,31 +229,27 @@ void calculateDistances(Fruit *fruit, Snake *snake)
     int rightDownWall = 1;
     int rightUpWall = 1;
 
-    int leftSelf = BOARD_SIZE;
-    int rightSelf = BOARD_SIZE;
-    int upSelf = BOARD_SIZE;
-    int downSelf = BOARD_SIZE;
+    int leftSelf = 0;
+    int rightSelf = 0;
+    int upSelf = 0;
+    int downSelf = 0;
 
-    int leftUpSelf = BOARD_SIZE;
-    int leftDownSelf = BOARD_SIZE;
-    int rightUpSelf = BOARD_SIZE;
-    int rightDownSelf = BOARD_SIZE;
+    int leftUpSelf = 0;
+    int leftDownSelf = 0;
+    int rightUpSelf = 0;
+    int rightDownSelf = 0;
 
-    int leftFruit = BOARD_SIZE;
-    int rightFruit = BOARD_SIZE;
-    int upFruit = BOARD_SIZE;
-    int downFruit = BOARD_SIZE;
+    int leftFruit = 0;
+    int rightFruit = 0;
+    int upFruit = 0;
+    int downFruit = 0;
 
-    int leftUpFruit = BOARD_SIZE;
-    int leftDownFruit = BOARD_SIZE;
-    int rightUpFruit = BOARD_SIZE;
-    int rightDownFruit = BOARD_SIZE;
+    int leftUpFruit = 0;
+    int leftDownFruit = 0;
+    int rightUpFruit = 0;
+    int rightDownFruit = 0;
 
-    //wall distance straight
-    snake->network.layerIn[0] = (double) (snake->head->y) / BOARD_SIZE;
-    snake->network.layerIn[1] = (double) (snake->head->x) / BOARD_SIZE;
-    snake->network.layerIn[2] = (double) (BOARD_SIZE - snake->head->x) / BOARD_SIZE;
-    snake->network.layerIn[3] = (double) (BOARD_SIZE - snake->head->y) / BOARD_SIZE;
+
 
     //self and fruit distance straight
     int tempX = snake->head->x - 1;
@@ -261,13 +258,16 @@ void calculateDistances(Fruit *fruit, Snake *snake)
 
     while (tempX >= 0)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && leftSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && leftSelf == 0)
             leftSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && leftFruit == BOARD_SIZE)
-            leftFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && leftFruit == 0)
+            leftFruit = 1;
         cnt++;
         tempX--;
     }
+
+    if(leftSelf)
+        leftSelf = 1 / leftSelf;
 
     tempX = snake->head->x + 1;
     tempY = snake->head->y;
@@ -275,13 +275,15 @@ void calculateDistances(Fruit *fruit, Snake *snake)
 
     while (tempX < BOARD_SIZE)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && rightSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && rightSelf == 0)
             rightSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && rightFruit == BOARD_SIZE)
-            rightFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && rightFruit == 0)
+            rightFruit = 1;
         cnt++;
         tempX++;
     }
+    if(rightSelf)
+        rightSelf = 1 / rightSelf;
 
     tempX = snake->head->x;
     tempY = snake->head->y + 1;
@@ -289,13 +291,15 @@ void calculateDistances(Fruit *fruit, Snake *snake)
 
     while (tempY < BOARD_SIZE)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && downSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && downSelf == 0)
             downSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && downFruit == BOARD_SIZE)
-            downFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && downFruit == 0)
+            downFruit = 1;
         cnt++;
         tempY++;
     }
+    if(downSelf)
+        downSelf = 1 / downSelf;
 
     tempX = snake->head->x;
     tempY = snake->head->y - 1;
@@ -303,14 +307,16 @@ void calculateDistances(Fruit *fruit, Snake *snake)
 
     while (tempY >= 0)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && upSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && upSelf == 0)
             upSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && upFruit == BOARD_SIZE)
-            upFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && upFruit == 0)
+            upFruit = 1;
         cnt++;
         tempY--;
     }
 
+    if(upSelf)
+        upSelf = 1 / upSelf;
 
     //wall, fruit and self distance diagonal
     tempX = snake->head->x - 1;
@@ -318,113 +324,106 @@ void calculateDistances(Fruit *fruit, Snake *snake)
     cnt = 1;
     while (tempY >= 0 && tempX >= 0)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && leftUpSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && leftUpSelf == 0)
             leftUpSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && leftUpFruit == BOARD_SIZE)
-            leftUpFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && leftUpFruit == 0)
+            leftUpFruit = 1;
         cnt++;
         leftUpWall++;
         tempY--;
         tempX--;
     }
+    if (leftUpSelf)
+        leftUpSelf = 1 / leftUpSelf;
 
     tempX = snake->head->x - 1;
     tempY = snake->head->y + 1;
     cnt = 1;
     while (tempY <= BOARD_SIZE && tempX >= 0)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && leftDownSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && leftDownSelf == 0)
             leftDownSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && leftDownFruit == BOARD_SIZE)
-            leftDownFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && leftDownFruit == 0)
+            leftDownFruit = 1;
 
         cnt++;
         leftDownWall++;
         tempY++;
         tempX--;
     }
+    if(leftDownSelf)
+        leftDownSelf = 1 / leftDownSelf;
 
     tempX = snake->head->x + 1;
     tempY = snake->head->y + 1;
     cnt = 1;
     while (tempY <= BOARD_SIZE && tempX <= BOARD_SIZE)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && rightDownSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && rightDownSelf == 0)
             rightDownSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && rightDownFruit == BOARD_SIZE)
-            rightDownFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && rightDownFruit == 0)
+            rightDownFruit = 1;
         cnt++;
         rightDownWall++;
         tempY++;
         tempX++;
     }
+    if(rightDownSelf)
+        rightDownSelf = 1 / rightDownSelf;
 
     tempX = snake->head->x + 1;
     tempY = snake->head->y - 1;
     cnt = 1;
     while (tempY >= 0 && tempX <= BOARD_SIZE)
     {
-        if (isSnakeSegmentHere(snake, tempX, tempY) && rightUpSelf == BOARD_SIZE)
+        if (isSnakeSegmentHere(snake, tempX, tempY) && rightUpSelf == 0)
             rightUpSelf = cnt;
-        if (isFruitHere(fruit, tempX, tempY) && rightUpFruit == BOARD_SIZE)
-            rightUpFruit = cnt;
+        if (isFruitHere(fruit, tempX, tempY) && rightUpFruit == 0)
+            rightUpFruit = 1;
         cnt++;
         rightUpWall++;
         tempY--;
         tempX++;
     }
+    if(rightUpSelf)
+        rightUpSelf = 1 / rightDownSelf;
 
+    //wall distance straight
+    setValue(&snake->network.layerIn, 12, 0, (double) 1 / (snake->head->y));
+    setValue(&snake->network.layerIn, 23, 0, (double) 1 / (snake->head->x));
+    setValue(&snake->network.layerIn, 17, 0, (double) 1 / (BOARD_SIZE - snake->head->x));
+    setValue(&snake->network.layerIn, 15, 0, (double) 1 / (BOARD_SIZE - snake->head->y));
 
-    snake->network.layerIn[4] = (double) leftUpWall / BOARD_SIZE;
-    snake->network.layerIn[5] = (double) leftDownWall / BOARD_SIZE;
-    snake->network.layerIn[6] = (double) rightUpWall / BOARD_SIZE;
-    snake->network.layerIn[7] = (double) rightDownWall / BOARD_SIZE;
+    setValue(&snake->network.layerIn, 16, 0, (double) 1 / leftUpWall);
+    setValue(&snake->network.layerIn, 4, 0, (double) 1 / leftDownWall);
+    setValue(&snake->network.layerIn, 11, 0, (double) 1 / rightUpWall);
+    setValue(&snake->network.layerIn, 10, 0, (double) 1 / rightDownWall);
 
-    snake->network.layerIn[8] = (double) upSelf / BOARD_SIZE;
-    snake->network.layerIn[9] = (double) downSelf / BOARD_SIZE;
-    snake->network.layerIn[10] = (double) leftSelf / BOARD_SIZE;
-    snake->network.layerIn[11] = (double) rightSelf / BOARD_SIZE;
+    setValue(&snake->network.layerIn, 18, 0, (double) upSelf);
+    setValue(&snake->network.layerIn, 0, 0, (double) downSelf);
+    setValue(&snake->network.layerIn, 21, 0, (double) leftSelf);
+    setValue(&snake->network.layerIn, 9, 0, (double) rightSelf);
 
-    snake->network.layerIn[16] = (double) upFruit / BOARD_SIZE;
-    snake->network.layerIn[17] = (double) downFruit / BOARD_SIZE;
-    snake->network.layerIn[18] = (double) leftFruit / BOARD_SIZE;
-    snake->network.layerIn[19] = (double) rightFruit / BOARD_SIZE;
+    setValue(&snake->network.layerIn, 7, 0, (double) upFruit);
+    setValue(&snake->network.layerIn, 1, 0, (double) downFruit);
+    setValue(&snake->network.layerIn, 14, 0, (double) leftFruit);
+    setValue(&snake->network.layerIn, 2, 0, (double) rightFruit);
 
-    snake->network.layerIn[12] = (double) leftUpSelf / BOARD_SIZE;
-    snake->network.layerIn[13] = (double) leftDownSelf / BOARD_SIZE;
-    snake->network.layerIn[14] = (double) rightUpSelf / BOARD_SIZE;
-    snake->network.layerIn[15] = (double) rightDownSelf / BOARD_SIZE;
+    setValue(&snake->network.layerIn, 13, 0, (double) leftUpSelf);
+    setValue(&snake->network.layerIn, 19, 0, (double) leftDownSelf);
+    setValue(&snake->network.layerIn, 5, 0, (double) rightUpSelf);
+    setValue(&snake->network.layerIn, 20, 0, (double) rightDownSelf);
 
-    snake->network.layerIn[20] = (double) leftUpFruit / BOARD_SIZE;
-    snake->network.layerIn[21] = (double) leftDownFruit / BOARD_SIZE;
-    snake->network.layerIn[22] = (double) rightUpFruit / BOARD_SIZE;
-    snake->network.layerIn[23] = (double) rightDownFruit / BOARD_SIZE;
+    setValue(&snake->network.layerIn, 6, 0, (double) leftUpFruit);
+    setValue(&snake->network.layerIn, 8, 0, (double) leftDownFruit);
+    setValue(&snake->network.layerIn, 22, 0, (double) rightUpFruit);
+    setValue(&snake->network.layerIn, 3, 0, (double) rightDownFruit);
 }
 
-double getSnakeFitness(Snake *snake)
-{
-    resetSnake(snake, BOARD_SIZE / 2, 3, DOWN);
-    Fruit fruit;
-    fruit.x = rand() % BOARD_SIZE;
-    fruit.y = rand() % BOARD_SIZE;
-    while (isSnakeValid(snake))
-    {
-        calculateDistances(&fruit, snake);
-        calculateOutput(&snake->network);
-        setSnakeDirection(snake, getOutputDirection(&snake->network));
-
-        if (updateFruit(&fruit, snake))
-            addSnakeSegment(snake);
-        updateSnakePosition(snake);
-    }
-    snake->fitness = snake->length;
-    resetSnake(snake, BOARD_SIZE / 2, 3, DOWN);
-    return snake->fitness;
-}
 
 void calculateFitness(Snake *snake)
 {
-    snake->fitness = snake->lifetime * snake->length * pow(2, snake->length);
+    snake->fitness = snake->lifetime * snake->lifetime * pow(2, snake->length);
 }
 
 int compareSnakeFitness(const void *s1, const void *s2)

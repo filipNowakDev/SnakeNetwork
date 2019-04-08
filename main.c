@@ -24,11 +24,13 @@ int main()
                 quit = true;
         }
 
+
+        int start = SDL_GetTicks();
         clearScreen(&game);
         updateGameState(&game);
         drawGame(&game);
 
-        //SDL_Delay(5);
+        while(SDL_GetTicks() - start < 20);
         SDL_RenderPresent(game.renderer);
 
     }

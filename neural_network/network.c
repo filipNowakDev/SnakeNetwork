@@ -8,26 +8,25 @@
 #include <math.h>
 #include "../snake/snake.h"
 
-void initRandomNetwork(Network *network)
+
+
+void randomizeNetwork(Network *network)
 {
+    randomizeMatrix(&network->weightsInHidden);
+    randomizeMatrix(&network->weightsHiddenHidden);
+    randomizeMatrix(&network->weightsHiddenOut);
+}
 
-    for (int i = 0; i < INPUT_NEURONS; i++)
-    {
-        for (int j = 0; j < HIDDEN_NEURONS; j++)
-        {
-            network->weightsIn[i][j] = (rand() / (double) RAND_MAX) * 2 - 1;
-            network->biasIn[i][j] = (rand() / (double) RAND_MAX) * 2 - 1;
-        }
-    }
+void initNetwork(Network *network)
+{
+    initMatrix(&network->layerIn, INPUT_NEURONS + 1, 1);
+    initMatrix(&network->layerHidden1, HIDDEN_NEURONS + 1, 1);
+    initMatrix(&network->layerHidden2, HIDDEN_NEURONS + 1, 1);
+    initMatrix(&network->layerOut, OUTPUT_NEURONS + 1, 1);
 
-    for (int i = 0; i < HIDDEN_NEURONS; i++)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; j++)
-        {
-            network->weightsOut[i][j] = (rand() / (double) RAND_MAX) * 2 - 1;
-            network->biasOut[i][j] = (rand() / (double) RAND_MAX) * 2 - 1;
-        }
-    }
+    initMatrix(&network->weightsInHidden, HIDDEN_NEURONS, INPUT_NEURONS + 1);
+    initMatrix(&network->weightsHiddenHidden, HIDDEN_NEURONS, HIDDEN_NEURONS + 1);
+    initMatrix(&network->weightsHiddenOut, OUTPUT_NEURONS, HIDDEN_NEURONS + 1);
 }
 
 double sigmoid(double x)
@@ -37,26 +36,27 @@ double sigmoid(double x)
 
 void calculateOutput(Network *network)
 {
-    for (int j = 0; j < HIDDEN_NEURONS; ++j)
-        network->layerHidden[j] = 0;
 
-    for (int i = 0; i < INPUT_NEURONS; ++i)
-        for (int j = 0; j < HIDDEN_NEURONS; ++j)
-            network->layerHidden[j] += network->layerIn[i] * network->weightsIn[i][j] + network->biasIn[i][j];
+    setValue(&network->layerIn, network->layerIn.rows - 1, 0, 1);
 
-    for (int j = 0; j < HIDDEN_NEURONS; ++j)
-        network->layerHidden[j] = sigmoid(network->layerHidden[j]);
+    dotProductMatrices(&network->weightsInHidden, &network->layerIn, &network->layerHidden1);
+    activateLayer(&network->layerHidden1);
+    setValue(&network->layerHidden1, network->layerHidden1.rows - 1, 0, 1);
+
+    dotProductMatrices(&network->weightsHiddenHidden, &network->layerHidden1, &network->layerHidden2);
+    activateLayer(&network->layerHidden2);
+    setValue(&network->layerHidden2, network->layerHidden2.rows - 1, 0, 1);
+
+    dotProductMatrices(&network->weightsHiddenOut, &network->layerHidden2, &network->layerOut);
+    activateLayer(&network->layerOut);
 
 
-    for (int j = 0; j < OUTPUT_NEURONS; ++j)
-        network->layerOut[j] = 0;
+}
 
-    for (int i = 0; i < HIDDEN_NEURONS; ++i)
-        for (int j = 0; j < OUTPUT_NEURONS; ++j)
-            network->layerOut[j] += network->layerHidden[i] * network->weightsOut[i][j] + network->biasOut[i][j];
-
-    for (int j = 0; j < HIDDEN_NEURONS; ++j)
-        network->layerOut[j] = sigmoid(network->layerOut[j]);
+void activateLayer(Matrix *matrix)
+{
+    for(int i = 0; i < matrix->rows; i++)
+        setValue(matrix, i, 0, sigmoid(getValue(matrix, i, 0)));
 }
 
 SegmentDirection getOutputDirection(Network *network)
@@ -66,9 +66,9 @@ SegmentDirection getOutputDirection(Network *network)
 
     for (int i = 0; i < OUTPUT_NEURONS; ++i)
     {
-        if (network->layerOut[i] > max)
+        if (getValue(&network->layerOut, i, 0) > max)
         {
-            max = network->layerOut[i];
+            max = getValue(&network->layerOut, i, 1);
             dir = i;
         }
     }
@@ -77,115 +77,35 @@ SegmentDirection getOutputDirection(Network *network)
 
 void cloneNetwork(Network *parent, Network *child)
 {
-    for (int i = 0; i < INPUT_NEURONS; i++)
-    {
-        for (int j = 0; j < HIDDEN_NEURONS; j++)
-        {
-            child->weightsIn[i][j] = parent->weightsIn[i][j];
-            child->biasIn[i][j] = parent->biasIn[i][j];
-        }
-    }
-
-    for (int i = 0; i < HIDDEN_NEURONS; i++)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; j++)
-        {
-            child->weightsOut[i][j] = parent->weightsOut[i][j];
-            child->biasOut[i][j] = parent->biasOut[i][j];
-        }
-    }
+    cloneMatrix(&parent->weightsInHidden, &child->weightsInHidden);
+    cloneMatrix(&parent->weightsHiddenHidden, &child->weightsHiddenHidden);
+    cloneMatrix(&parent->weightsHiddenOut, &child->weightsHiddenOut);
 }
 
 
 void crossoverNetworks(Network *parent1, Network *parent2, Network *child)
 {
-    int rand1 = rand() % INPUT_NEURONS;
-    int rand2 = rand() % HIDDEN_NEURONS;
-
-    for (int i = 0; i < INPUT_NEURONS; ++i)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; ++j)
-        {
-            if (i < rand1 || (i == rand1 && j <= rand2))
-            {
-                child->weightsIn[i][j] = parent1->weightsIn[i][j];
-                child->biasIn[i][j] = parent1->biasIn[i][j];
-            } else
-            {
-                child->weightsIn[i][j] = parent2->weightsIn[i][j];
-                child->biasIn[i][j] = parent2->biasIn[i][j];
-            }
-        }
-    }
-
-    rand1 = rand() % HIDDEN_NEURONS;
-    rand2 = rand() % OUTPUT_NEURONS;
-
-    for (int i = 0; i < HIDDEN_NEURONS; ++i)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; ++j)
-        {
-            if (i < rand1 || (i == rand1 && j <= rand2))
-            {
-                child->weightsOut[i][j] = parent1->weightsOut[i][j];
-                child->biasOut[i][j] = parent1->biasOut[i][j];
-            } else
-            {
-                child->weightsOut[i][j] = parent2->weightsOut[i][j];
-                child->biasOut[i][j] = parent2->biasOut[i][j];
-            }
-        }
-    }
+    crossoverMatrix(&parent1->weightsInHidden, &parent2->weightsInHidden, &child->weightsInHidden);
+    crossoverMatrix(&parent1->weightsHiddenOut, &parent2->weightsHiddenOut, &child->weightsHiddenOut);
+    crossoverMatrix(&parent1->weightsHiddenHidden, &parent2->weightsHiddenHidden, &child->weightsHiddenHidden);
 }
 
 void mutateNetwork(double rate, Network *network)
 {
-    for (int i = 0; i < INPUT_NEURONS; ++i)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; ++j)
-        {
-            if (rand() / (double) RAND_MAX <= rate)
-            {
-                network->weightsIn[i][j] += (rand() / (double) RAND_MAX) / 5.0  - 0.1;
-                if(network->weightsIn[i][j] < -1)
-                    network->weightsIn[i][j] = -1;
-                if(network->weightsIn[i][j] > 1)
-                    network->weightsIn[i][j] = 1;
-            }
-            if (rand() / (double) RAND_MAX <= rate)
-            {
-                network->biasIn[i][j] += (rand() / (double) RAND_MAX) / 5.0 - 0.1;
-                if(network->biasIn[i][j] < -1)
-                    network->biasIn[i][j] = -1;
-                if(network->biasIn[i][j] > 1)
-                    network->biasIn[i][j] = 1;
-            }
+    mutateMatrix(rate, &network->weightsInHidden);
+    mutateMatrix(rate, &network->weightsHiddenHidden);
+    mutateMatrix(rate, &network->weightsHiddenOut);
+}
 
-        }
-    }
-
-    for (int i = 0; i < HIDDEN_NEURONS; ++i)
-    {
-        for (int j = 0; j < OUTPUT_NEURONS; ++j)
-        {
-            if (rand() / (double) RAND_MAX <= rate)
-            {
-                network->weightsOut[i][j] += (rand() / (double) RAND_MAX) / 5.0 - 0.1;
-                if(network->weightsOut[i][j] < -1)
-                    network->weightsOut[i][j] = -1;
-                if(network->weightsOut[i][j] > 1)
-                    network->weightsOut[i][j] = 1;
-            }
-            if (rand() / (double) RAND_MAX <= rate)
-            {
-                network->biasOut[i][j] += (rand() / (double) RAND_MAX) / 5.0 - 0.1;
-                if(network->biasOut[i][j] < -1)
-                    network->biasOut[i][j] = -1;
-                if(network->biasOut[i][j] > 1)
-                    network->biasOut[i][j] = 1;
-            }
-        }
-    }
+void destroyNetwork(Network *network)
+{
+    destroyMatrix(&network->layerIn);
+    destroyMatrix(&network->layerOut);
+    destroyMatrix(&network->layerHidden1);
+    destroyMatrix(&network->layerHidden2);
+    destroyMatrix(&network->weightsInHidden);
+    destroyMatrix(&network->weightsHiddenHidden);
+    destroyMatrix(&network->weightsHiddenOut);
 }
 
 

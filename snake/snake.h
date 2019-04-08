@@ -68,8 +68,6 @@ void calculateDistances(Fruit *fruit, Snake *snake);
 
 bool isSnakeSegmentHere(Snake *snake, int x, int y);
 
-double getSnakeFitness(Snake* snake);
-
 void calculateFitness(Snake* snake);
 
 int compareSnakeFitness (const void * s1, const void * s2);

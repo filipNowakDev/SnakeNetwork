@@ -9,8 +9,8 @@
 #include "../snake/snake.h"
 
 typedef struct Game Game;
-#define POPULATION_SIZE 100
-#define MUTATION_RATE 0.20
+#define POPULATION_SIZE 1000
+#define MUTATION_RATE 0.90
 
 typedef struct Population
 {

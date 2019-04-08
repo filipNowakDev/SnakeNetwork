@@ -16,8 +16,8 @@ void initPopulation(Population *p)
     p->currentBestSnake = 0;
     for (int i = 0; i < POPULATION_SIZE; ++i)
     {
-        initSnake(p->snakes + i, BOARD_SIZE / 2, 3, DOWN);
-        initRandomNetwork(&p->snakes[i].network);
+        initSnake(p->snakes + i, BOARD_SIZE / 2, BOARD_SIZE / 2, DOWN);
+        randomizeNetwork(&p->snakes[i].network);
     }
 }
 
@@ -83,7 +83,7 @@ bool areAnySnakesAlive(Population *population)
 void destroyPopulation(Population *population)
 {
     for (int i = 0; i < POPULATION_SIZE; ++i)
-        destroySnakeSegments(population->snakes + i);
+        destroySnake(population->snakes + i);
     free(population->snakes);
 }
 
@@ -94,13 +94,19 @@ void nextGeneration(Population *p)
     for (int i = 0; i < POPULATION_SIZE; ++i)
     {
         calculateFitness(p->snakes + i);
-        initSnake(newSnakes + i, BOARD_SIZE / 2, 3, DOWN);
+        initSnake(newSnakes + i, BOARD_SIZE / 2, BOARD_SIZE / 2, DOWN);
     }
     setBestGlobalSnake(p);
 
     cloneNetwork(&p->snakes[p->populationBestSnake].network, &newSnakes[0].network);
 
-    for (int j = 1; j < POPULATION_SIZE; ++j)
+    for (int i = 1; i < 100; ++i)
+    {
+        cloneNetwork(&p->snakes[p->populationBestSnake].network, &newSnakes[i].network);
+        mutateNetwork(MUTATION_RATE, &newSnakes[i].network);
+    }
+
+    for (int j = 100; j < POPULATION_SIZE; ++j)
     {
         Snake *parent1 = tournamentSelect(p);
         Snake *parent2 = tournamentSelect(p);
@@ -137,18 +143,20 @@ void setBestGlobalSnake(Population *p)
 
 Snake *tournamentSelect(Population *p)
 {
-    Snake *randomlySelected[POPULATION_SIZE / 10];
-    Snake *bestSelected[POPULATION_SIZE / 10];
-    for (int i = 0; i < POPULATION_SIZE / 10; i++)
+    const static int BEST_SELECTED = POPULATION_SIZE / 50;
+    const static int RANDOMLY_SELECTED = POPULATION_SIZE / 50;
+    Snake *randomlySelected[RANDOMLY_SELECTED];
+    Snake *bestSelected[BEST_SELECTED];
+    for (int i = 0; i < BEST_SELECTED; i++)
     {
-        for (int j = 0; j < POPULATION_SIZE / 10; ++j)
+        for (int j = 0; j < RANDOMLY_SELECTED; ++j)
         {
             randomlySelected[j] = &p->snakes[rand() % POPULATION_SIZE];
         }
-        qsort(randomlySelected, POPULATION_SIZE / 10, sizeof(Snake *), compareSnakeFitness);
+        qsort(randomlySelected, RANDOMLY_SELECTED, sizeof(Snake *), compareSnakeFitness);
         bestSelected[i] = randomlySelected[0];
     }
-    qsort(bestSelected, POPULATION_SIZE / 10, sizeof(Snake *), compareSnakeFitness);
+    qsort(bestSelected, BEST_SELECTED, sizeof(Snake *), compareSnakeFitness);
     return bestSelected[0];
 }
 

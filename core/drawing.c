@@ -78,9 +78,9 @@ void drawGame(Game *game)
 
 void drawBestSnake(Game *game)
 {
-    //drawSnake(&game->population.snakes[game->population.currentBestSnake], game);
-    for(int i = 0; i < POPULATION_SIZE; i++)
-        drawSnake(&game->population.snakes[i], game);
+    drawSnake(&game->population.snakes[game->population.currentBestSnake], game);
+  /*  for(int i = 0; i < POPULATION_SIZE; i++)
+        drawSnake(&game->population.snakes[i], game);*/
 }
 
 void drawGenerationLabel(Game *game)
