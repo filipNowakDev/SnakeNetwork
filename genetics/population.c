@@ -143,8 +143,8 @@ void setBestGlobalSnake(Population *p)
 
 Snake *tournamentSelect(Population *p)
 {
-    const static int BEST_SELECTED = POPULATION_SIZE / 50;
-    const static int RANDOMLY_SELECTED = POPULATION_SIZE / 50;
+    const static int BEST_SELECTED = POPULATION_SIZE / 100;
+    const static int RANDOMLY_SELECTED = POPULATION_SIZE / 100;
     Snake *randomlySelected[RANDOMLY_SELECTED];
     Snake *bestSelected[BEST_SELECTED];
     for (int i = 0; i < BEST_SELECTED; i++)

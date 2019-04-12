@@ -79,7 +79,6 @@ void free_resources(Game *game)
     game->font = NULL;
     game->window = NULL;
     game->renderer = NULL;
-    //game->snake = NULL;
     TTF_Quit();
     SDL_Quit();
 }

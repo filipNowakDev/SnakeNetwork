@@ -96,7 +96,7 @@ void mutateMatrix(double rate, Matrix *matrix)
         {
             if ((rand() / (double) RAND_MAX) <= rate)
             {
-                double change = (rand() / (double) RAND_MAX) / 4.0 - 0.125;
+                double change = (rand() / (double) RAND_MAX) / 2.0 - 0.25;
                 setValue(matrix, i, j, getValue(matrix, i, j) + change);
                 if (getValue(matrix, i, j) < -1)
                     setValue(matrix, i, j, -1);
